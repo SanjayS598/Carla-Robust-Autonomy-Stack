@@ -1,0 +1,9 @@
+name: "simple_highway"
+map_type: "X"
+traffic_density: 0.15
+num_agents: 5
+agent_policy: "IDM"
+seed: 123
+frame_drop_prob: 0.0
+position_noise_std: 0.0
+scripted_events: []

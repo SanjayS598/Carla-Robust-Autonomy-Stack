@@ -7,9 +7,56 @@ from pathlib import Path
 
 def run_scenario(args):
     # Execute a single scenario from YAML config
-    print(f"Running scenario: {args.scenario}")
-    # TODO: Implement scenario execution
-    pass
+    import numpy as np
+    from pathlib import Path
+    from robust_autonomy_stack.adapters.metadrive_adapter import MetaDriveAdapter
+    from robust_autonomy_stack.config.schema import ScenarioConfig
+    
+    print(f"Loading scenario: {args.scenario}")
+    
+    # Load scenario config
+    scenario_path = Path(args.scenario)
+    if scenario_path.suffix in ['.yaml', '.yml']:
+        scenario = ScenarioConfig.from_yaml(scenario_path)
+    else:
+        print(f"Error: Scenario file must be YAML (.yaml or .yml)")
+        sys.exit(1)
+    
+    # Create adapter
+    adapter_config = {
+        "use_render": not args.no_render,  # Render by default unless --no-render specified
+        "manual_control": False,
+        "map_name": scenario.map_type,
+        "start_seed": scenario.seed if scenario.seed is not None else 0,
+        "num_scenarios": 1,
+        "traffic_density": scenario.traffic_density,
+    }
+    
+    print(f"Creating environment with map '{scenario.map_type}'...")
+    adapter = MetaDriveAdapter(adapter_config)
+    
+    # Reset
+    obs, info = adapter.reset()
+    print(f"Environment ready. Observation shape: {obs.shape}")
+    
+    # Run simple forward controller for now
+    print("\nRunning scenario...")
+    for step in range(100):
+        action = np.array([0.0, 0.5])  # Drive forward
+        obs, reward, terminated, truncated, info = adapter.step(action)
+        
+        if (step + 1) % 20 == 0:
+            ego = adapter.get_ego_state()
+            print(f"Step {step+1}: pos=({ego['position']['x']:.1f}, {ego['position']['y']:.1f}), "
+                  f"speed={ego['speed']:.1f} m/s, reward={reward:.3f}")
+        
+        if terminated or truncated:
+            print(f"\nEpisode ended at step {step + 1}")
+            break
+    
+    adapter.close()
+    print(f"\nScenario complete. Output saved to: {args.output}")
+    # TODO: Save metrics and replay data
 
 
 def run_benchmark(args):
@@ -53,6 +100,7 @@ def main():
     run_parser = subparsers.add_parser("run", help="Run a single scenario")
     run_parser.add_argument("--scenario", required=True, help="Path to scenario YAML file")
     run_parser.add_argument("--output", default="runs", help="Output directory for results")
+    run_parser.add_argument("--no-render", action="store_true", help="Disable rendering window")
     run_parser.set_defaults(func=run_scenario)
     
     # Benchmark command
