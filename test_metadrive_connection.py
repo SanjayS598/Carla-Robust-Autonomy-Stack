@@ -1,1 +1,61 @@
-# Test script to verify MetaDrive installation and basic functionality\n# Run this to check if MetaDrive is properly installed\n\nimport sys\n\ntry:\n    from metadrive import MetaDriveEnv\n    from metadrive.constants import HELP_MESSAGE\n    print(\"SUCCESS: MetaDrive imported successfully\")\n    print(f\"MetaDrive version: {MetaDriveEnv.VERSION if hasattr(MetaDriveEnv, 'VERSION') else 'unknown'}\")\nexcept ImportError as e:\n    print(f\"ERROR: Failed to import MetaDrive: {e}\")\n    print(\"\\nInstall MetaDrive with: pip install metadrive-simulator\")\n    sys.exit(1)\n\ndef test_metadrive():\n    print(\"\\nCreating MetaDrive environment...\")\n    \n    try:\n        # Create a simple environment\n        config = {\n            \"use_render\": False,  # No rendering for this test\n            \"manual_control\": False,\n            \"traffic_density\": 0.1,\n            \"map\": \"X\",  # Simple intersection map\n            \"start_seed\": 0,\n        }\n        \n        env = MetaDriveEnv(config)\n        print(\"SUCCESS: MetaDrive environment created\")\n        \n        # Reset environment\n        obs, info = env.reset()\n        print(f\"Observation shape: {obs.shape if hasattr(obs, 'shape') else type(obs)}\")\n        print(f\"Info keys: {list(info.keys()) if isinstance(info, dict) else 'N/A'}\")\n        \n        # Take a few random steps\n        print(\"\\nTaking 5 random steps...\")\n        for i in range(5):\n            action = env.action_space.sample()\n            obs, reward, terminated, truncated, info = env.step(action)\n            print(f\"Step {i+1}: reward={reward:.3f}, terminated={terminated}, truncated={truncated}\")\n            \n            if terminated or truncated:\n                print(\"Episode ended early\")\n                break\n        \n        env.close()\n        print(\"\\nSUCCESS: MetaDrive is working correctly!\")\n        print(\"\\nYou can now proceed with Phase 1.2: Implementing the MetaDrive adapter\")\n        return True\n        \n    except Exception as e:\n        print(f\"ERROR: Failed to run MetaDrive: {e}\")\n        import traceback\n        traceback.print_exc()\n        return False\n\nif __name__ == \"__main__\":\n    success = test_metadrive()\n    sys.exit(0 if success else 1)
+# Test script to verify MetaDrive installation and basic functionality
+# Run this to check if MetaDrive is properly installed
+
+import sys
+
+try:
+    from metadrive import MetaDriveEnv
+    from metadrive.constants import HELP_MESSAGE
+    print("SUCCESS: MetaDrive imported successfully")
+    print(f"MetaDrive version: {MetaDriveEnv.VERSION if hasattr(MetaDriveEnv, 'VERSION') else 'unknown'}")
+except ImportError as e:
+    print(f"ERROR: Failed to import MetaDrive: {e}")
+    print("\nInstall MetaDrive with: pip install metadrive-simulator")
+    sys.exit(1)
+
+def test_metadrive():
+    print("\nCreating MetaDrive environment...")
+    
+    try:
+        # Create a simple environment
+        config = {
+            "use_render": False,  # No rendering for this test
+            "manual_control": False,
+            "traffic_density": 0.1,
+            "map": "X",  # Simple intersection map
+            "start_seed": 0,
+        }
+        
+        env = MetaDriveEnv(config)
+        print("SUCCESS: MetaDrive environment created")
+        
+        # Reset environment
+        obs, info = env.reset()
+        print(f"Observation shape: {obs.shape if hasattr(obs, 'shape') else type(obs)}")
+        print(f"Info keys: {list(info.keys()) if isinstance(info, dict) else 'N/A'}")
+        
+        # Take a few random steps
+        print("\nTaking 5 random steps...")
+        for i in range(5):
+            action = env.action_space.sample()
+            obs, reward, terminated, truncated, info = env.step(action)
+            print(f"Step {i+1}: reward={reward:.3f}, terminated={terminated}, truncated={truncated}")
+            
+            if terminated or truncated:
+                print("Episode ended early")
+                break
+        
+        env.close()
+        print("\nSUCCESS: MetaDrive is working correctly!")
+        print("\nYou can now proceed with Phase 1.2: Implementing the MetaDrive adapter")
+        return True
+        
+    except Exception as e:
+        print(f"ERROR: Failed to run MetaDrive: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+if __name__ == "__main__":
+    success = test_metadrive()
+    sys.exit(0 if success else 1)

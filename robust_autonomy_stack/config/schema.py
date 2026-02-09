@@ -12,10 +12,9 @@ class SimulatorConfig(BaseModel):
     
     use_render: bool = Field(default=False, description="Enable rendering window")
     map_name: str = Field(default="X", description="Map type (X, O, C, S, R, T)")
-    port: int = Field(default=2000, description="CARLA server port")
-    timeout_s: float = Field(default=10.0, description="Connection timeout in seconds")
-    synchronous: bool = Field(default=True, description="Use synchronous mode")
-    fixed_delta_seconds: float = Field(default=0.05, description="Fixed simulation timestep (20 FPS)")
+    manual_control: bool = Field(default=False, description="Enable manual keyboard control")
+    num_scenarios: int = Field(default=1, description="Number of scenarios to generate")
+    start_seed: int = Field(default=0, description="Random seed for environment")
 
 
 class SensorConfig(BaseModel):
